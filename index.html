@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Crop Yield Prediction System</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================
+           ROOT VARIABLES
+        ==========================*/
+        :root{
+            --primary:#00c853;
+            --secondary:#69f0ae;
+            --glass:rgba(255,255,255,0.08);
+            --border:rgba(255,255,255,0.18);
+            --text:#ffffff;
+            --shadow:0 8px 32px rgba(0,0,0,0.3);
+            --bg:#071b11;
+            --card:#0f2d1f;
+            --input:#173624;
+            --nav:#08150f;
+            --gradient:linear-gradient(135deg,#00c853,#64dd17);
+            --font:'Poppins', sans-serif;
+        }
+
+        body.light-mode{
+            --primary:#2e7d32;
+            --secondary:#66bb6a;
+            --glass:rgba(255,255,255,0.45);
+            --border:rgba(255,255,255,0.6);
+            --text:#111;
+            --shadow:0 8px 30px rgba(0,0,0,0.1);
+            --bg:#f4fff4;
+            --card:#ffffff;
+            --input:#f2fff2;
+            --nav:#ffffff;
+            --gradient:linear-gradient(135deg,#43a047,#8bc34a);
+            --font:'Orbitron', sans-serif;
+        }
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            font-family:var(--font);
+            background:var(--bg);
+            color:var(--text);
+            overflow-x:hidden;
+            transition:0.4s ease;
+        }
+
+        /* =========================
+           CUSTOM SCROLLBAR
+        ==========================*/
+        ::-webkit-scrollbar{
+            width:10px;
+        }
+
+        ::-webkit-scrollbar-track{
+            background:#111;
+        }
+
+        ::-webkit-scrollbar-thumb{
+            background:linear-gradient(#00c853,#64dd17);
+            border-radius:10px;
+        }
+
+        /* =========================
+           BACKGROUND
+        ==========================*/
+        .background{
+            position:fixed;
+            width:100%;
+            height:100vh;
+            background:
+            linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
+            url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?q=80&w=1600&auto=format&fit=crop');
+            background-size:cover;
+            background-position:center;
+            animation:bgMove 20s infinite alternate ease-in-out;
+            z-index:-2;
+        }
+
+        @keyframes bgMove{
+            from{
+                transform:scale(1);
+            }
+            to{
+                transform:scale(1.08);
+            }
+        }
+
+        .particles{
+            position:fixed;
+            width:100%;
+            height:100%;
+            z-index:-1;
+            overflow:hidden;
+        }
+
+        .particles span{
+            position:absolute;
+            display:block;
+            width:8px;
+            height:8px;
+            background:rgba(255,255,255,0.2);
+            animation:float 15s linear infinite;
+            border-radius:50%;
+        }
+
+        @keyframes float{
+            0%{
+                transform:translateY(100vh) scale(0);
+                opacity:0;
+            }
+            50%{
+                opacity:1;
+            }
+            100%{
+                transform:translateY(-10vh) scale(1);
+                opacity:0;
+            }
+        }
+
+        /* =========================
+           NAVBAR
+        ==========================*/
+        .navbar{
+            background:rgba(0,0,0,0.35)!important;
+            backdrop-filter:blur(10px);
+            border-bottom:1px solid rgba(255,255,255,0.1);
+        }
+
+        .navbar-brand{
+            font-weight:700;
+            color:#fff!important;
+            font-size:1.4rem;
+        }
+
+        .theme-btn{
+            border:none;
+            width:45px;
+            height:45px;
+            border-radius:50%;
+            background:var(--gradient);
+            color:#fff;
+            transition:0.3s;
+        }
+
+        .theme-btn:hover{
+            transform:rotate(180deg) scale(1.1);
+        }
+
+        /* =========================
+           DASHBOARD STATS
+        ==========================*/
+        .stats-card{
+            background:var(--glass);
+            backdrop-filter:blur(10px);
+            border:1px solid var(--border);
+            border-radius:20px;
+            padding:20px;
+            text-align:center;
+            box-shadow:var(--shadow);
+            transition:0.4s;
+        }
+
+        .stats-card:hover{
+            transform:translateY(-8px);
+        }
+
+        .stats-card i{
+            font-size:2rem;
+            margin-bottom:10px;
+            color:#7CFC00;
+        }
+
+        /* =========================
+           MAIN CARD
+        ==========================*/
+        .main-card{
+            background:var(--glass);
+            backdrop-filter:blur(15px);
+            border:1px solid var(--border);
+            border-radius:30px;
+            padding:40px;
+            box-shadow:var(--shadow);
+            position:relative;
+            overflow:hidden;
+            animation:fadeIn 1.2s ease;
+        }
+
+        .main-card::before{
+            content:'';
+            position:absolute;
+            inset:0;
+            padding:2px;
+            border-radius:30px;
+            background:linear-gradient(135deg,#00ff88,#00c853,#64dd17);
+            -webkit-mask:
+            linear-gradient(#fff 0 0) content-box,
+            linear-gradient(#fff 0 0);
+            -webkit-mask-composite:xor;
+            mask-composite:exclude;
+        }
+
+        @keyframes fadeIn{
+            from{
+                opacity:0;
+                transform:translateY(40px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+
+        /* =========================
+           HEADER
+        ==========================*/
+        .logo-icon{
+            width:90px;
+            height:90px;
+            border-radius:50%;
+            background:var(--gradient);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin:auto;
+            animation:floatIcon 4s ease infinite;
+            box-shadow:0 0 30px rgba(0,255,120,0.5);
+        }
+
+        @keyframes floatIcon{
+            0%,100%{
+                transform:translateY(0);
+            }
+            50%{
+                transform:translateY(-10px);
+            }
+        }
+
+        .logo-icon i{
+            font-size:2.5rem;
+            color:#fff;
+        }
+
+        .title{
+            font-size:3rem;
+            font-weight:700;
+            background:linear-gradient(to right,#00ff88,#ffffff);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        .typing{
+            border-right:3px solid #fff;
+            white-space:nowrap;
+            overflow:hidden;
+            width:0;
+            animation:typing 5s steps(30,end) infinite alternate;
+        }
+
+        @keyframes typing{
+            from{
+                width:0;
+            }
+            to{
+                width:100%;
+            }
+        }
+
+        .weather-badge{
+            position:absolute;
+            top:25px;
+            right:25px;
+            background:rgba(255,255,255,0.15);
+            padding:10px 15px;
+            border-radius:50px;
+            font-size:14px;
+            border:1px solid rgba(255,255,255,0.2);
+        }
+
+        /* =========================
+           FORM
+        ==========================*/
+        .form-floating label{
+            color:#bbb !important;
+        }
+
+        .form-control,
+        .form-select{
+            background:var(--input)!important;
+            border:1px solid rgba(255,255,255,0.1)!important;
+            color:var(--text)!important;
+            border-radius:15px!important;
+            height:58px;
+        }
+
+        .form-select option{
+            color:#000;
+        }
+
+        .form-control:focus,
+        .form-select:focus{
+            box-shadow:0 0 15px rgba(0,255,120,0.4)!important;
+            border-color:#00ff88!important;
+        }
+
+        .input-group-text{
+            background:var(--gradient);
+            border:none;
+            color:#fff;
+            border-radius:15px 0 0 15px;
+        }
+
+        /* =========================
+           BUTTON
+        ==========================*/
+        .predict-btn{
+            width:100%;
+            padding:16px;
+            border:none;
+            border-radius:16px;
+            background:var(--gradient);
+            color:#fff;
+            font-size:1.1rem;
+            font-weight:600;
+            position:relative;
+            overflow:hidden;
+            transition:0.4s;
+        }
+
+        .predict-btn:hover{
+            transform:scale(1.03);
+            box-shadow:0 0 25px rgba(0,255,100,0.4);
+        }
+
+        .predict-btn::before{
+            content:'';
+            position:absolute;
+            width:100px;
+            height:100px;
+            background:rgba(255,255,255,0.3);
+            border-radius:50%;
+            transform:scale(0);
+            transition:0.5s;
+        }
+
+        .predict-btn:hover::before{
+            transform:scale(4);
+            opacity:0;
+        }
+
+        /* =========================
+           RESULT CARD
+        ==========================*/
+        .result-card{
+            display:none;
+            margin-top:30px;
+            padding:25px;
+            border-radius:20px;
+            background:rgba(0,255,120,0.12);
+            border:1px solid rgba(0,255,120,0.3);
+            animation:fadeIn 0.8s ease;
+        }
+
+        .yield-number{
+            font-size:3rem;
+            font-weight:700;
+            color:#00ff88;
+        }
+
+        /* =========================
+           PROGRESS BARS
+        ==========================*/
+        .progress{
+            height:14px;
+            border-radius:20px;
+            background:#1c1c1c;
+        }
+
+        .progress-bar{
+            background:var(--gradient);
+            animation:progressAnim 2s ease;
+        }
+
+        @keyframes progressAnim{
+            from{
+                width:0;
+            }
+        }
+
+        /* =========================
+           FEATURE CARDS
+        ==========================*/
+        .feature-card{
+            background:var(--glass);
+            backdrop-filter:blur(12px);
+            border-radius:22px;
+            border:1px solid var(--border);
+            padding:25px;
+            text-align:center;
+            transition:0.4s;
+            height:100%;
+        }
+
+        .feature-card:hover{
+            transform:translateY(-10px);
+            box-shadow:0 0 25px rgba(0,255,100,0.25);
+        }
+
+        .feature-card i{
+            font-size:2.5rem;
+            margin-bottom:15px;
+            color:#00ff88;
+        }
+
+        /* =========================
+           HISTORY
+        ==========================*/
+        .history-item{
+            background:rgba(255,255,255,0.06);
+            border-radius:15px;
+            padding:15px;
+            margin-bottom:15px;
+            transition:0.3s;
+        }
+
+        .history-item:hover{
+            transform:translateX(8px);
+        }
+
+        /* =========================
+           FOOTER
+        ==========================*/
+        footer{
+            background:rgba(0,0,0,0.4);
+            backdrop-filter:blur(10px);
+            padding:30px 0;
+            margin-top:70px;
+            border-top:1px solid rgba(255,255,255,0.1);
+        }
+
+        footer a{
+            color:#00ff88;
+            text-decoration:none;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ==========================*/
+        @media(max-width:768px){
+            .title{
+                font-size:2rem;
+            }
+
+            .main-card{
+                padding:25px;
+            }
+
+            .weather-badge{
+                position:static;
+                margin:15px auto;
+                display:inline-block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background -->
+    <div class="background"></div>
+
+    <!-- Floating Particles -->
+    <div class="particles">
+        <span style="left:10%; animation-delay:0s;"></span>
+        <span style="left:20%; animation-delay:2s;"></span>
+        <span style="left:35%; animation-delay:4s;"></span>
+        <span style="left:50%; animation-delay:1s;"></span>
+        <span style="left:65%; animation-delay:5s;"></span>
+        <span style="left:80%; animation-delay:3s;"></span>
+        <span style="left:90%; animation-delay:6s;"></span>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fa-solid fa-seedling"></i> Smart Farming AI
+            </a>
+
+            <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navMenu">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item mx-2">
+                        <a class="nav-link active" href="#">Dashboard</a>
+                    </li>
+
+                    <li class="nav-item mx-2">
+                        <a class="nav-link" href="#">Predictions</a>
+                    </li>
+
+                    <li class="nav-item mx-2">
+                        <a class="nav-link" href="#">Analytics</a>
+                    </li>
+
+                    <li class="nav-item ms-3">
+                        <button class="theme-btn" id="themeToggle">
+                            <i class="fa-solid fa-moon"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container py-5">
+
+        <!-- DASHBOARD STATS -->
+        <div class="row g-4 mb-5">
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <i class="fa-solid fa-wheat-awn"></i>
+                    <h3>250+</h3>
+                    <p>Total Crops</p>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <i class="fa-solid fa-cloud-rain"></i>
+                    <h3>78%</h3>
+                    <p>Avg Rainfall</p>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <i class="fa-solid fa-mountain-sun"></i>
+                    <h3>89%</h3>
+                    <p>Soil Quality</p>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <i class="fa-solid fa-temperature-high"></i>
+                    <h3>28°C</h3>
+                    <p>Temperature</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+
+                <div class="main-card">
+
+                    <div class="weather-badge">
+                        <i class="fa-solid fa-cloud-sun"></i>
+                        27°C | Sunny
+                    </div>
+
+                    <!-- HEADER -->
+                    <div class="text-center mb-5">
+
+                        <div class="logo-icon mb-4">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+
+                        <h1 class="title typing mx-auto">
+                            Crop Yield Prediction
+                        </h1>
+
+                        <p class="mt-3 text-light">
+                            AI Powered Smart Farming System
+                        </p>
+                    </div>
+
+                    <!-- FORM -->
+                    <form id="predictionForm">
+
+                        <div class="row g-4">
+
+                            <!-- State -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <select class="form-select" required>
+                                            <option value="" selected disabled>Select State</option>
+                                            <option>Punjab</option>
+                                            <option>Haryana</option>
+                                            <option>Rajasthan</option>
+                                            <option>Uttar Pradesh</option>
+                                            <option>Maharashtra</option>
+                                            <option>Bihar</option>
+                                            <option>Gujarat</option>
+                                            <option>Karnataka</option>
+                                            <option>Tamil Nadu</option>
+                                            <option>Madhya Pradesh</option>
+                                        </select>
+                                        <label>State Name</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- District -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-map"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <select class="form-select" required>
+                                            <option value="" selected disabled>Select District</option>
+                                            <option>Kurukshetra</option>
+                                            <option>Karnal</option>
+                                            <option>Hisar</option>
+                                            <option>Rohtak</option>
+                                            <option>Jaipur</option>
+                                            <option>Lucknow</option>
+                                            <option>Patna</option>
+                                            <option>Nashik</option>
+                                            <option>Ahmedabad</option>
+                                            <option>Bhopal</option>
+                                        </select>
+                                        <label>District Name</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Crop Year -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="month" class="form-control" required>
+                                        <label>Crop Year</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Season -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-cloud-sun-rain"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <select class="form-select" required>
+                                            <option value="" selected disabled>Select Season</option>
+                                            <option>Kharif</option>
+                                            <option>Rabi</option>
+                                            <option>Summer</option>
+                                            <option>Winter</option>
+                                            <option>Autumn</option>
+                                            <option>Whole Year</option>
+                                            <option>Monsoon</option>
+                                        </select>
+                                        <label>Season</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Crop -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-seedling"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <select class="form-select" required>
+                                            <option value="" selected disabled>Select Crop</option>
+                                            <option>Wheat</option>
+                                            <option>Rice</option>
+                                            <option>Sugarcane</option>
+                                            <option>Maize</option>
+                                            <option>Cotton</option>
+                                            <option>Millets</option>
+                                            <option>Barley</option>
+                                            <option>Mustard</option>
+                                            <option>Groundnut</option>
+                                            <option>Soybean</option>
+                                            <option>Tomato</option>
+                                            <option>Potato</option>
+                                            <option>Onion</option>
+                                        </select>
+                                        <label>Crop Name</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Temperature -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-temperature-high"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" class="form-control" placeholder="Temperature" required>
+                                        <label>Temperature (°C)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Humidity -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-water"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" class="form-control" placeholder="Humidity" required>
+                                        <label>Humidity (%)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Soil -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-mound"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" class="form-control" placeholder="Soil Moisture" required>
+                                        <label>Soil Moisture (%)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Area -->
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fa-solid fa-chart-area"></i>
+                                    </span>
+
+                                    <div class="form-floating flex-grow-1">
+                                        <input type="number" class="form-control" placeholder="Area" required>
+                                        <label>Area (Hectares)</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BUTTON -->
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="predict-btn">
+                                    <i class="fa-solid fa-brain"></i>
+                                    Predict Crop Yield
+                                </button>
+                            </div>
+
+                        </div>
+                    </form>
+
+                    <!-- RESULT CARD -->
+                    <div class="result-card text-center" id="resultCard">
+
+                        <i class="fa-solid fa-award fa-3x text-success mb-3"></i>
+
+                        <h2>Predicted Yield</h2>
+
+                        <div class="yield-number">
+                            4.8 Ton/Hectare
+                        </div>
+
+                        <p class="mt-3">
+                            Excellent conditions detected for crop production.
+                        </p>
+
+                        <div class="row mt-4 g-3">
+
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <i class="fa-solid fa-droplet"></i>
+                                    <h5>Moisture</h5>
+                                    <p>Optimal</p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <i class="fa-solid fa-temperature-half"></i>
+                                    <h5>Climate</h5>
+                                    <p>Favorable</p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="stats-card">
+                                    <i class="fa-solid fa-leaf"></i>
+                                    <h5>Crop Health</h5>
+                                    <p>Excellent</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- PROGRESS BARS -->
+        <div class="row mt-5 g-4">
+
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <h5 class="mb-3">Soil Moisture</h5>
+                    <div class="progress">
+                        <div class="progress-bar" style="width:80%"></div>
+                    </div>
+                    <p class="mt-2">80% Healthy</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <h5 class="mb-3">Humidity</h5>
+                    <div class="progress">
+                        <div class="progress-bar" style="width:70%"></div>
+                    </div>
+                    <p class="mt-2">70% Stable</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <h5 class="mb-3">Temperature</h5>
+                    <div class="progress">
+                        <div class="progress-bar" style="width:85%"></div>
+                    </div>
+                    <p class="mt-2">85% Perfect</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SMART FEATURES -->
+        <div class="row mt-5 g-4">
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <i class="fa-solid fa-brain"></i>
+                    <h5>AI Prediction Accuracy</h5>
+                    <p>Advanced ML model with high prediction precision.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <i class="fa-solid fa-cloud-sun-rain"></i>
+                    <h5>Weather Analysis</h5>
+                    <p>Live weather intelligence for better crop planning.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <i class="fa-solid fa-seedling"></i>
+                    <h5>Soil Health Monitoring</h5>
+                    <p>Monitor soil quality and moisture in real-time.</p>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card">
+                    <i class="fa-solid fa-faucet-drip"></i>
+                    <h5>Smart Irrigation</h5>
+                    <p>Reduce water waste using intelligent irrigation.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- HISTORY -->
+        <div class="row mt-5">
+            <div class="col-12">
+
+                <div class="main-card">
+
+                    <h3 class="mb-4">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Prediction History
+                    </h3>
+
+                    <div class="history-item">
+                        Wheat • Haryana • Yield: 4.2 Ton/Hectare
+                    </div>
+
+                    <div class="history-item">
+                        Rice • Punjab • Yield: 5.6 Ton/Hectare
+                    </div>
+
+                    <div class="history-item">
+                        Cotton • Rajasthan • Yield: 3.4 Ton/Hectare
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container text-center">
+
+            <h5>
+                <i class="fa-solid fa-leaf"></i>
+                Smart Farming Dashboard
+            </h5>
+
+            <p class="mt-3">
+                “Empowering Farmers with Artificial Intelligence”
+            </p>
+
+            <div class="my-3">
+                <a href="#">
+                    <i class="fab fa-github fa-2x"></i>
+                </a>
+            </div>
+
+            <p class="mb-0">
+                Developed by Harsh Dhiman © 2026
+            </p>
+
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ==============================
+        // DARK / LIGHT MODE TOGGLE
+        // ==============================
+        const themeToggle = document.getElementById("themeToggle");
+
+        themeToggle.addEventListener("click", () => {
+            document.body.classList.toggle("light-mode");
+
+            if(document.body.classList.contains("light-mode")){
+                themeToggle.innerHTML =
+                '<i class="fa-solid fa-sun"></i>';
+            }
+            else{
+                themeToggle.innerHTML =
+                '<i class="fa-solid fa-moon"></i>';
+            }
+        });
+
+        // ==============================
+        // FORM SUBMIT ANIMATION
+        // ==============================
+        const form = document.getElementById("predictionForm");
+        const resultCard = document.getElementById("resultCard");
+
+        form.addEventListener("submit", function(e){
+            e.preventDefault();
+
+            const btn = document.querySelector(".predict-btn");
+
+            btn.innerHTML =
+            '<span class="spinner-border spinner-border-sm"></span> Predicting...';
+
+            setTimeout(() => {
+
+                btn.innerHTML =
+                '<i class="fa-solid fa-check"></i> Prediction Complete';
+
+                resultCard.style.display = "block";
+
+                resultCard.scrollIntoView({
+                    behavior:"smooth"
+                });
+
+            }, 2500);
+        });
+
+        // ==============================
+        // TOOLTIPS
+        // ==============================
+        const tooltipTriggerList =
+        [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+
+</body>
+</html>
